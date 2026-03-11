@@ -8,14 +8,17 @@ const Login = ({ setUser }) => {
   const [twoFACode, setTwoFACode] = useState("");
   const [step, setStep] = useState(1);
   const [error, setError] = useState("");
+  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
+
+  const apiBase = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`${apiBase}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -24,6 +27,7 @@ const Login = ({ setUser }) => {
       const data = await response.json();
 
       if (response.ok) {
+        setUserId(data.userId); // Store userId for 2FA verification
         setStep(2); // paso de código 2FA
       } else {
         setError(data.message || "Error al iniciar sesión.");
@@ -41,7 +45,7 @@ const Login = ({ setUser }) => {
       const response = await fetch("http://localhost:5000/api/auth/verify-2fa", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: twoFACode }),
+        body: JSON.stringify({ userId, code: twoFACode }),
       });
 
       const data = await response.json();
