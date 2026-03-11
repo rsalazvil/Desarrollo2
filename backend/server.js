@@ -10,10 +10,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("MongoDB conectado")).catch((err) => console.error("Error al conectar MongoDB:", err));
+// Determine Mongo URI: prefer environment variable, otherwise assume
+// the Docker Compose service name "mongo" so the backend works inside
+// a container without extra configuration.
+const mongoUri = process.env.MONGO_URI || "mongodb://mongo:27017/desarrollo2";
+
+mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }).then(() => console.log("MongoDB conectado"))
+  .catch((err) => console.error("Error al conectar MongoDB:", err));
 
 app.use("/api/auth", authRoutes);
 
